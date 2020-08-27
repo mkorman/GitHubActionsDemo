@@ -19,4 +19,7 @@ jobs:
       - name: 'Build Docker Image'
         uses: docker/build-push-action@v1
         with:
-          repository: $GITHUB_REPOSITORY
+            username: ${{ secrets.DOCKER_USERNAME }}
+            password: ${{ secrets.DOCKER_PASSWORD }}
+            repository: mkormanc/testimages
+            tags: latest

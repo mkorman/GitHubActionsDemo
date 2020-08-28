@@ -23,8 +23,8 @@ jobs:
     
     - name: 'Build image and publish to ACR'
       run: |
-        docker build . -t testimages.azurecr.io/github-actions-demo:latest
-        docker push testimages.azurecr.io/github-actions-demo:latest
+        docker build . -t testimages.azurecr.io/wilbur:latest
+        docker push testimages.azurecr.io/wilbur:latest
 
     - name: 'Login via Azure CLI'
       uses: azure/login@v1.1
@@ -33,17 +33,17 @@ jobs:
 
     - name: 'Delete existing Container Instance'
       run: |
-        az container delete --name github-actions-demo --resource-group Test --yes
+        az container delete --name wilbur --resource-group Test --yes
         
     - name: 'Deploy to Azure Container Instances'
       uses: 'azure/aci-deploy@v1'
       with:
         resource-group: Test
-        dns-name-label: github-actions-demo
-        image: testimages.azurecr.io/github-actions-demo:latest
+        dns-name-label: wilbur
+        image: testimages.azurecr.io/wilbur:latest
         registry-login-server: testimages.azurecr.io
         registry-username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
         registry-password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
-        name: github-actions-demo
+        name: wilbur
         location: 'westeurope'
         memory: 1

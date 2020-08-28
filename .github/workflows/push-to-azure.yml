@@ -1,0 +1,49 @@
+name: Publish to Azure Container Registry
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 'Checkout code'
+      uses: actions/checkout@v2
+
+    - name: 'Login to Azure Container Registry'
+      uses: azure/docker-login@v1
+      with:
+        login-server: testimages.azurecr.io
+        username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
+        password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
+    
+    - name: 'Build image and publish to ACR'
+      run: |
+        docker build . -t testimages.azurecr.io/github-actions-demo:latest
+        docker push testimages.azurecr.io/github-actions-demo:latest
+
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1.1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: 'Delete existing Container Instance'
+      run: |
+        az container delete --name github-actions-demo --resource-group Test --yes
+        
+    - name: 'Deploy to Azure Container Instances'
+      uses: 'azure/aci-deploy@v1'
+      with:
+        resource-group: Test
+        dns-name-label: github-actions-demo
+        image: testimages.azurecr.io/github-actions-demo:latest
+        registry-login-server: testimages.azurecr.io
+        registry-username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
+        registry-password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
+        name: github-actions-demo
+        location: 'westeurope'
+        memory: 1
